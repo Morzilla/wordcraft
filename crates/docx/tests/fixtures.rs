@@ -616,8 +616,6 @@ fn chart_and_diagram_drawings_are_graphic_objects() {
     }
 }
 
-/// `wp:anchor/@relativeHeight` is the stacking order of floating objects; it is read, and
-/// written back as read, so a panel listed after its text boxes still stays below them.
 /// A text box shape's style text colour (`wps:style/a:fontRef`) is kept on its story, as what
 /// automatic text colour means inside it; a box without one has none.
 #[test]
