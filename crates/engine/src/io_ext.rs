@@ -35,6 +35,7 @@ pub fn save(ext: &str, doc: &Document, opts: &crate::io::ExportOptions) -> Optio
                 include_markup: opts.markup,
                 comments: opts.markup && opts.comments,
                 form_fields: opts.form_fields,
+                blank_fields: opts.blank_fields,
                 ..Default::default()
             };
             Some(wordcraft_pdf::export(doc, &pdf).map_err(|e| e.to_string()))

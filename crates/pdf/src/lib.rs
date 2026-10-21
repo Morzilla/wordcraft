@@ -99,6 +99,9 @@ pub struct PdfOptions {
     /// content controls that may be edited, with their values. None on pages drawn scaled or moved
     /// (`comments`, `paper`).
     pub form_fields: bool,
+    /// Fillable text fields over blanks drawn with underscores (`Name: ________`, `__/__/20__`);
+    /// the page looks the same. None on pages drawn scaled or moved.
+    pub blank_fields: bool,
 }
 
 impl Default for PdfOptions {
@@ -113,6 +116,7 @@ impl Default for PdfOptions {
             compress: true,
             paper: None,
             form_fields: false,
+            blank_fields: false,
         }
     }
 }
@@ -1943,12 +1947,16 @@ fn add_form_fields(doc: &Document, lay: &DocLayout, opts: &PdfOptions, pages: &[
             (f.k - 1.0).abs() < 1e-6 && f.dx.abs() < 1e-6 && f.dy.abs() < 1e-6
         })
     });
-    if !opts.form_fields || !as_laid_out {
+    if !(opts.form_fields || opts.blank_fields) || !as_laid_out {
         return Ok(pdf);
+    }
+    let mut collected = if opts.form_fields { forms::collect(doc, lay) } else { Vec::new() };
+    if opts.blank_fields {
+        collected.extend(forms::collect_blanks(doc, lay));
     }
     // Layout pages to output pages: a field on every page it is printed on (a page listed twice
     // has its fields twice, unique names keeping them apart); fields on pages left out go too.
-    let mut fields: Vec<forms::FormField> = forms::collect(doc, lay)
+    let mut fields: Vec<forms::FormField> = collected
         .into_iter()
         .flat_map(|f| {
             pages
